@@ -1,4 +1,8 @@
+# R-Studio stuff
 .Rproj.user
 *.Rproj
 .Rhistory
 .RData
+
+# data files (are downloaded)
+activity.*

@@ -57,6 +57,18 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
+<pre class="r"><code># set variables
+url &lt;- &quot;https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip&quot;
+zipFile &lt;- &quot;activity.zip&quot;
+csvFile &lt;- &quot;activity.csv&quot;
+
+# download and unzip the data file
+download.file(url,zipFile,method=&quot;curl&quot;)
+unzip(zipFile, setTimes=TRUE)
+
+# read the csv data file into a data.table
+library(data.table)
+ACTIVITY &lt;- as.data.table(read.csv(csvFile))</code></pre>
 </div>
 <div id="what-is-mean-total-number-of-steps-taken-per-day" class="section level2">
 <h2>What is mean total number of steps taken per day?</h2>
