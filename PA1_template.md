@@ -158,7 +158,7 @@ ACTIVITY[Day %in% c("Sat","Sun"), typeDay:="weekend"]
 
 
 ```r
-# set the key to "i" column for join (save the actual key)
+# set the key to "interval" column for join (save the actual key)
 Akey <- key(ACTIVITY)
 setkey(ACTIVITY, interval)
 
@@ -178,7 +178,7 @@ ACTIVITY <- ACTIVITY[WD][,`:=`(vD=V1,V1=NULL)]
 ACTIVITY[typeDay=="weekend" & is.na(steps), steps:=as.integer(round(vE))]
 ACTIVITY[typeDay=="weekday" & is.na(steps), steps:=as.integer(round(vD))]
 
-# reset original key on ACTIVITY
+# restore original key on ACTIVITY
 setkeyv(ACTIVITY, Akey)
 ```
 
@@ -205,6 +205,33 @@ ACTIVITY[c(1,500,1100,9800,10000), ]
 > daily number of steps?
 
 
+```r
+hist(ACTIVITY[, sum(steps), by=date]$V1,
+     breaks=15,
+     main="plot 4-4:\nHistogram of the total number of steps taken each day\nimputed NA values",
+     xlab="Sum of steps per day")
+```
+
+![](PA1_template_files/figure-html/q4-4-1.png) 
+
+```r
+print(sprintf("%-15.15s: %10.2f  --  without imputing it was: %.2f", 
+              "the mean is", 
+              mean(ACTIVITY[, sum(steps), by=date]$V1),
+              mean(A_ign_na[, sum(steps), by=date]$V1)))
+print(sprintf("%-15.15s: %10d  --  without imputing it was: %d", 
+              "the median is", 
+              median(ACTIVITY[, sum(steps), by=date]$V1),
+              median(A_ign_na[, sum(steps), by=date]$V1)))
+```
+
+```
+## [1] "the mean is    :   10761.90  --  without imputing it was: 10766.19"
+## [1] "the median is  :      10571  --  without imputing it was: 10765"
+```
+
+
+
 ## &nbsp;
 ## (5) Are there differences in activity patterns between weekdays and weekends?
 
@@ -215,10 +242,51 @@ ACTIVITY[c(1,500,1100,9800,10000), ]
 > and “weekend” indicating whether a given date is a weekday or weekend
 > day**
 
+This step has been realized under 4-2, above. Remove here the columns no longer needed and show some example lines from the dataset:
+
+
+```r
+# remove columns no longer needed
+ACTIVITY <- ACTIVITY[,`:=`(vE=NULL,vD=NULL,Day=NULL,naSteps=NULL)]
+
+# show some example result lines
+ACTIVITY[c(1,500,1100,9800,10000), ]
+```
+
+```
+##    steps       date interval typeDay
+## 1:     2 2012-10-01        0 weekday
+## 2:     0 2012-10-02     1735 weekday
+## 3:    16 2012-10-04     1935 weekday
+## 4:     0 2012-11-04       35 weekend
+## 5:   104 2012-11-04     1715 weekend
+```
+
+**Note:**  
+It is not recommended to use factors with data tables, see [this](https://github.com/Rdatatable/data.table/blob/master/README.md)
+
 
 > **2. Make a panel plot containing a time series plot (i.e. type = "l") of the
 > 5-minute interval (x-axis) and the average number of steps taken, averaged
 > across all weekday days or weekend days (y-axis).**
 
 
+```r
+WE <- ACTIVITY[typeDay=="weekend", mean(steps), by=interval]
+WD <- ACTIVITY[typeDay=="weekday", mean(steps), by=interval]
+
+par(mfrow=c(2,1)) 
+plot(x=WD$interval, y=WD$V1,
+     type="l",
+     main="plot 5-2:\nAverage number of steps per 5-minute interval\non weekdays:",
+     xlab="# of 5-minute interval",
+     ylab="mean(steps)")
+plot(x=WE$interval, y=WE$V1,
+     type="l",
+     main="on weekends:",
+     xlab="# of 5-minute interval",
+     ylab="mean(steps)")
+```
+
+![](PA1_template_files/figure-html/q5-2-1.png) 
 
