@@ -4,5 +4,8 @@
 .Rhistory
 .RData
 
-# data files (are downloaded)
+# rendered .md files except assignment
+README.html
+
+# data files (are downloaded by running knitr)
 activity.*
