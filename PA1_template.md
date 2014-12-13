@@ -147,10 +147,9 @@ In anticipation of task 5-1, the variable `typeDay` with two levels – “weekd
 # get English day names
 Sys.setlocale(category = "LC_TIME", locale="C")
 
-# insert Day name column and typeDay column as "weekday"
-ACTIVITY[, `:=`(Day=weekdays(as.Date(date),abbreviate=TRUE), typeDay="weekday")]
-# set typeDay to "weekend" for Saturdays and Sundays
-ACTIVITY[Day %in% c("Sat","Sun"), typeDay:="weekend"]
+# insert column "typeDay" as "weekend" or "weekday" depending on date
+ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date),abbreviate=TRUE) %in% c("Sat","Sun"),
+                           "weekend", "weekday")]
 ```
 
 > **3. Create a new dataset that is equal to the original dataset but with the
@@ -158,28 +157,17 @@ ACTIVITY[Day %in% c("Sat","Sun"), typeDay:="weekend"]
 
 
 ```r
-# set the key to "interval" column for join (save the actual key)
-Akey <- key(ACTIVITY)
-setkey(ACTIVITY, interval)
-
-# create data tables with average steps per interval
-# for weekends WE and weekdays WD (key() will be "i")
-WE <- ACTIVITY[typeDay=="weekend" & !is.na(steps), mean(steps), by=interval]
-WD <- ACTIVITY[typeDay=="weekday" & !is.na(steps), mean(steps), by=interval]
-
 # for comparison, copy steps column to naSteps (steps with NA values)
 ACTIVITY[, naSteps:=steps]
 
-# join in the WE/WD tables, rename their V1 column to dE/vD
-ACTIVITY <- ACTIVITY[WE][,`:=`(vE=V1,V1=NULL)]
-ACTIVITY <- ACTIVITY[WD][,`:=`(vD=V1,V1=NULL)]
+# create an auxilary table with average steps per typeDay and interval
+AUX <- ACTIVITY[!is.na(steps), as.integer(round(mean(steps))), keyby=.(typeDay,interval)]
 
-# overwrite the NA steps by respective mean
-ACTIVITY[typeDay=="weekend" & is.na(steps), steps:=as.integer(round(vE))]
-ACTIVITY[typeDay=="weekday" & is.na(steps), steps:=as.integer(round(vD))]
-
-# restore original key on ACTIVITY
-setkeyv(ACTIVITY, Akey)
+# join the AUX into ACTIVITY by typeDay and interval
+# and set steps = average from AUX where steps == NA
+setkeyv(ACTIVITY, key(AUX))  # set key for join
+ACTIVITY <- ACTIVITY[AUX][, steps:=ifelse(is.na(steps),V1,steps)][, V1:=NULL]
+setkeyv(ACTIVITY, c('date','interval'))  # restore original key
 ```
 
 ```r
@@ -188,12 +176,12 @@ ACTIVITY[c(1,500,1100,9800,10000), ]
 ```
 
 ```
-##    steps       date interval Day typeDay naSteps        vE        vD
-## 1:     2 2012-10-01        0 Mon weekday      NA   0.00000  2.333333
-## 2:     0 2012-10-02     1735 Tue weekday       0  39.85714 66.769231
-## 3:    16 2012-10-04     1935 Thu weekday      16  20.85714 46.897436
-## 4:     0 2012-11-04       35 Sun weekend      NA   0.00000  1.179487
-## 5:   104 2012-11-04     1715 Sun weekend      NA 103.50000 46.051282
+##    steps       date interval typeDay naSteps
+## 1:     2 2012-10-01        0 weekday      NA
+## 2:     0 2012-10-02     1735 weekday       0
+## 3:    16 2012-10-04     1935 weekday      16
+## 4:     0 2012-11-04       35 weekend      NA
+## 5:   104 2012-11-04     1715 weekend      NA
 ```
 
 
@@ -247,8 +235,20 @@ This step has been realized under 4-2, above. Remove here the columns no longer 
 
 ```r
 # remove columns no longer needed
-ACTIVITY <- ACTIVITY[,`:=`(vE=NULL,vD=NULL,Day=NULL,naSteps=NULL)]
+ACTIVITY <- ACTIVITY[,`:=`(vE=NULL,vD=NULL,naSteps=NULL)]
+```
 
+```
+## Warning in `[.data.table`(ACTIVITY, , `:=`(vE = NULL, vD = NULL, naSteps =
+## NULL)): Adding new column 'vE' then assigning NULL (deleting it).
+```
+
+```
+## Warning in `[.data.table`(ACTIVITY, , `:=`(vE = NULL, vD = NULL, naSteps =
+## NULL)): Adding new column 'vD' then assigning NULL (deleting it).
+```
+
+```r
 # show some example result lines
 ACTIVITY[c(1,500,1100,9800,10000), ]
 ```
@@ -263,7 +263,8 @@ ACTIVITY[c(1,500,1100,9800,10000), ]
 ```
 
 **Note:**  
-It is not recommended to use factors with data tables, see [this](https://github.com/Rdatatable/data.table/blob/master/README.md)
+It is not recommended to use factors with data tables, see `vignette("datatable-faq")` Q 2.17  
+&nbsp;  
 
 
 > **2. Make a panel plot containing a time series plot (i.e. type = "l") of the
@@ -278,11 +279,13 @@ WD <- ACTIVITY[typeDay=="weekday", mean(steps), by=interval]
 par(mfrow=c(2,1)) 
 plot(x=WD$interval, y=WD$V1,
      type="l",
+     ylim = c(0,250),  # same y range on both plots for comparison
      main="plot 5-2:\nAverage number of steps per 5-minute interval\non weekdays:",
-     xlab="# of 5-minute interval",
+     xaxt="n", xlab=NULL,  # does not work
      ylab="mean(steps)")
 plot(x=WE$interval, y=WE$V1,
      type="l",
+     ylim = c(0,250),  # same y range on both plots for comparison
      main="on weekends:",
      xlab="# of 5-minute interval",
      ylab="mean(steps)")
