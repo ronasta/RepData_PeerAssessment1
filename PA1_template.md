@@ -28,15 +28,51 @@ unzip(zipFile, setTimes=TRUE)
 
 # read the csv data file into a data.table
 library(data.table)
+```
+
+```
+## 
+## Attaching package: 'data.table'
+## 
+## The following object is masked _by_ '.GlobalEnv':
+## 
+##     .N
+```
+
+```r
 ACTIVITY <- as.data.table(read.csv(csvFile))
 setkeyv(ACTIVITY, c('date','interval'))
 tables()
 ```
 
 ```
-##      NAME       NROW NCOL MB COLS                KEY          
-## [1,] ACTIVITY 17,568    3  1 steps,date,interval date,interval
-## Total: 1MB
+##       NAME       NROW NCOL MB COLS                             
+##  [1,] A           288    2  1 interval,V1                      
+##  [2,] ACTIVITY 17,568    3  1 steps,date,interval              
+##  [3,] A_ign_na 15,264    3  1 steps,date,interval              
+##  [4,] AUX           6    3  1 typeDay,interval,V1              
+##  [5,] DT           12    5  1 date,interval,steps,typeDay,ss   
+##  [6,] FILL          3    2  1 i,V1                             
+##  [7,] FILLd         3    2  1 i,V1                             
+##  [8,] FILLe         3    2  1 i,V1                             
+##  [9,] WD          288    2  1 interval,V1                      
+## [10,] WE          288    2  1 interval,V1                      
+## [11,] X             3    2  1 i,V1                             
+## [12,] XX           12    6  1 date,interval,steps,typeDay,ss,V1
+##       KEY             
+##  [1,]                 
+##  [2,] date,interval   
+##  [3,] date,interval   
+##  [4,] typeDay,interval
+##  [5,] date,interval   
+##  [6,] i               
+##  [7,] i               
+##  [8,] i               
+##  [9,]                 
+## [10,]                 
+## [11,] i               
+## [12,] date,interval   
+## Total: 12MB
 ```
 
 
@@ -140,7 +176,7 @@ As the plot 3-1 above shows a rather inequal  distribution, the imputed value
 should consider this average. In order to not jeopardize the
 question about differences in the pattern for weekdays and weekends (5-1), the average per interval will be calculated seperatly for weekdays/weekends.
 
-In anticipation of task 5-1, the variable `typeDay` with two levels – “weekday” and “weekend” will be inserted here into the dataset:
+In anticipation of task 5-1, the variable `typeDay` with two values – “weekday” and “weekend” - will be inserted here into the dataset:
 
 
 ```r
@@ -148,7 +184,7 @@ In anticipation of task 5-1, the variable `typeDay` with two levels – “weekd
 Sys.setlocale(category = "LC_TIME", locale="C")
 
 # insert column "typeDay" as "weekend" or "weekday" depending on date
-ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date),abbreviate=TRUE) %in% c("Sat","Sun"),
+ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date), abbreviate=TRUE) %in% c("Sat","Sun"),
                            "weekend", "weekday")]
 ```
 
@@ -160,12 +196,12 @@ ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date),abbreviate=TRUE) %in% c("Sat",
 # for comparison, copy steps column to naSteps (steps with NA values)
 ACTIVITY[, naSteps:=steps]
 
-# create an auxilary table with average steps per typeDay and interval
+# create an auxilary table with average steps per typeDay and interval (column V1)
 AUX <- ACTIVITY[!is.na(steps), as.integer(round(mean(steps))), keyby=.(typeDay,interval)]
 
-# join the AUX into ACTIVITY by typeDay and interval
-# and set steps = average from AUX where steps == NA
-setkeyv(ACTIVITY, key(AUX))  # set key for join
+# join AUX into ACTIVITY by typeDay and interval (adds column V1)
+# and set steps = V1 where steps == NA; then remove V1 column
+setkeyv(ACTIVITY, key(AUX))  # set key for join (typeDay, interval)
 ACTIVITY <- ACTIVITY[AUX][, steps:=ifelse(is.na(steps),V1,steps)][, V1:=NULL]
 setkeyv(ACTIVITY, c('date','interval'))  # restore original key
 ```

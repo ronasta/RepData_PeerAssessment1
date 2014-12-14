@@ -128,7 +128,7 @@ As the plot 3-1 above shows a rather inequal  distribution, the imputed value
 should consider this average. In order to not jeopardize the
 question about differences in the pattern for weekdays and weekends (5-1), the average per interval will be calculated seperatly for weekdays/weekends.
 
-In anticipation of task 5-1, the variable `typeDay` with two levels – “weekday” and “weekend” will be inserted here into the dataset:
+In anticipation of task 5-1, the variable `typeDay` with two values – “weekday” and “weekend” - will be inserted here into the dataset:
 
 ```{r q4-2, results='hide'}
 
@@ -136,7 +136,7 @@ In anticipation of task 5-1, the variable `typeDay` with two levels – “weekd
 Sys.setlocale(category = "LC_TIME", locale="C")
 
 # insert column "typeDay" as "weekend" or "weekday" depending on date
-ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date),abbreviate=TRUE) %in% c("Sat","Sun"),
+ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date), abbreviate=TRUE) %in% c("Sat","Sun"),
                            "weekend", "weekday")]
 
 ```
@@ -149,12 +149,12 @@ ACTIVITY[, typeDay:=ifelse(weekdays(as.Date(date),abbreviate=TRUE) %in% c("Sat",
 # for comparison, copy steps column to naSteps (steps with NA values)
 ACTIVITY[, naSteps:=steps]
 
-# create an auxilary table with average steps per typeDay and interval
+# create an auxilary table with average steps per typeDay and interval (column V1)
 AUX <- ACTIVITY[!is.na(steps), as.integer(round(mean(steps))), keyby=.(typeDay,interval)]
 
-# join the AUX into ACTIVITY by typeDay and interval
-# and set steps = average from AUX where steps == NA
-setkeyv(ACTIVITY, key(AUX))  # set key for join
+# join AUX into ACTIVITY by typeDay and interval (adds column V1)
+# and set steps = V1 where steps == NA; then remove V1 column
+setkeyv(ACTIVITY, key(AUX))  # set key for join (typeDay, interval)
 ACTIVITY <- ACTIVITY[AUX][, steps:=ifelse(is.na(steps),V1,steps)][, V1:=NULL]
 setkeyv(ACTIVITY, c('date','interval'))  # restore original key
 
