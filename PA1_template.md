@@ -27,7 +27,7 @@ download.file(url,zipFile,method="curl")
 unzip(zipFile, setTimes=TRUE)
 
 # read the csv data file into a data.table
-library(data.table)
+library(data.table, quietly=TRUE)
 ```
 
 ```
@@ -42,37 +42,19 @@ library(data.table)
 ```r
 ACTIVITY <- as.data.table(read.csv(csvFile))
 setkeyv(ACTIVITY, c('date','interval'))
-tables()
+# tables()
+summary(ACTIVITY)
 ```
 
 ```
-##       NAME       NROW NCOL MB COLS                             
-##  [1,] A           288    2  1 interval,V1                      
-##  [2,] ACTIVITY 17,568    3  1 steps,date,interval              
-##  [3,] A_ign_na 15,264    3  1 steps,date,interval              
-##  [4,] AUX           6    3  1 typeDay,interval,V1              
-##  [5,] DT           12    5  1 date,interval,steps,typeDay,ss   
-##  [6,] FILL          3    2  1 i,V1                             
-##  [7,] FILLd         3    2  1 i,V1                             
-##  [8,] FILLe         3    2  1 i,V1                             
-##  [9,] WD          288    2  1 interval,V1                      
-## [10,] WE          288    2  1 interval,V1                      
-## [11,] X             3    2  1 i,V1                             
-## [12,] XX           12    6  1 date,interval,steps,typeDay,ss,V1
-##       KEY             
-##  [1,]                 
-##  [2,] date,interval   
-##  [3,] date,interval   
-##  [4,] typeDay,interval
-##  [5,] date,interval   
-##  [6,] i               
-##  [7,] i               
-##  [8,] i               
-##  [9,]                 
-## [10,]                 
-## [11,] i               
-## [12,] date,interval   
-## Total: 12MB
+##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840
 ```
 
 
@@ -137,11 +119,11 @@ contains the maximum number of steps?**
 
 ```r
 # maxInt <- A[which.max(A[,V1])]$interval
-print(paste("it is the interval number", A[which.max(A[,V1])]$interval))
+print(paste("the 5-minute interval containing the maximum number of steps is", A[which.max(A[,V1])]$interval))
 ```
 
 ```
-## [1] "it is the interval number 835"
+## [1] "the 5-minute interval containing the maximum number of steps is 835"
 ```
 
 ## &nbsp;

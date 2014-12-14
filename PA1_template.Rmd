@@ -32,10 +32,11 @@ download.file(url,zipFile,method="curl")
 unzip(zipFile, setTimes=TRUE)
 
 # read the csv data file into a data.table
-library(data.table)
+library(data.table, quietly=TRUE)
 ACTIVITY <- as.data.table(read.csv(csvFile))
 setkeyv(ACTIVITY, c('date','interval'))
-tables()
+# tables()
+summary(ACTIVITY)
 
 ```
 
@@ -96,7 +97,7 @@ contains the maximum number of steps?**
 ```{r q3-2}
 
 # maxInt <- A[which.max(A[,V1])]$interval
-print(paste("it is the interval number", A[which.max(A[,V1])]$interval))
+print(paste("the 5-minute interval containing the maximum number of steps is", A[which.max(A[,V1])]$interval))
 
 ```
 

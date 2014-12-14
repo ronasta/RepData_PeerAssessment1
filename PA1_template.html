@@ -76,7 +76,7 @@ download.file(url,zipFile,method=&quot;curl&quot;)
 unzip(zipFile, setTimes=TRUE)
 
 # read the csv data file into a data.table
-library(data.table)</code></pre>
+library(data.table, quietly=TRUE)</code></pre>
 <pre><code>## 
 ## Attaching package: 'data.table'
 ## 
@@ -85,34 +85,16 @@ library(data.table)</code></pre>
 ##     .N</code></pre>
 <pre class="r"><code>ACTIVITY &lt;- as.data.table(read.csv(csvFile))
 setkeyv(ACTIVITY, c('date','interval'))
-tables()</code></pre>
-<pre><code>##       NAME       NROW NCOL MB COLS                             
-##  [1,] A           288    2  1 interval,V1                      
-##  [2,] ACTIVITY 17,568    3  1 steps,date,interval              
-##  [3,] A_ign_na 15,264    3  1 steps,date,interval              
-##  [4,] AUX           6    3  1 typeDay,interval,V1              
-##  [5,] DT           12    5  1 date,interval,steps,typeDay,ss   
-##  [6,] FILL          3    2  1 i,V1                             
-##  [7,] FILLd         3    2  1 i,V1                             
-##  [8,] FILLe         3    2  1 i,V1                             
-##  [9,] WD          288    2  1 interval,V1                      
-## [10,] WE          288    2  1 interval,V1                      
-## [11,] X             3    2  1 i,V1                             
-## [12,] XX           12    6  1 date,interval,steps,typeDay,ss,V1
-##       KEY             
-##  [1,]                 
-##  [2,] date,interval   
-##  [3,] date,interval   
-##  [4,] typeDay,interval
-##  [5,] date,interval   
-##  [6,] i               
-##  [7,] i               
-##  [8,] i               
-##  [9,]                 
-## [10,]                 
-## [11,] i               
-## [12,] date,interval   
-## Total: 12MB</code></pre>
+# tables()
+summary(ACTIVITY)</code></pre>
+<pre><code>##      steps                date          interval     
+##  Min.   :  0.00   2012-10-01:  288   Min.   :   0.0  
+##  1st Qu.:  0.00   2012-10-02:  288   1st Qu.: 588.8  
+##  Median :  0.00   2012-10-03:  288   Median :1177.5  
+##  Mean   : 37.38   2012-10-04:  288   Mean   :1177.5  
+##  3rd Qu.: 12.00   2012-10-05:  288   3rd Qu.:1766.2  
+##  Max.   :806.00   2012-10-06:  288   Max.   :2355.0  
+##  NA's   :2304     (Other)   :15840</code></pre>
 </div>
 <div id="section" class="section level2">
 <h2> </h2>
@@ -158,8 +140,8 @@ plot(x=A$interval, y=A$V1,
 <p><strong>2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?</strong></p>
 </blockquote>
 <pre class="r"><code># maxInt &lt;- A[which.max(A[,V1])]$interval
-print(paste(&quot;it is the interval number&quot;, A[which.max(A[,V1])]$interval))</code></pre>
-<pre><code>## [1] &quot;it is the interval number 835&quot;</code></pre>
+print(paste(&quot;the 5-minute interval containing the maximum number of steps is&quot;, A[which.max(A[,V1])]$interval))</code></pre>
+<pre><code>## [1] &quot;the 5-minute interval containing the maximum number of steps is 835&quot;</code></pre>
 </div>
 <div id="section-2" class="section level2">
 <h2> </h2>
